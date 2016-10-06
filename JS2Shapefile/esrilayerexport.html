@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Feature Layer Only Map</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.18/esri/css/esri.css">
+    <style>
+      html, body, #map {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script src="https://js.arcgis.com/3.18/"></script>
+    <script type="text/javascript" src="./JS2Shapefile.js"></script>
+    <script>
+      require([
+        "dojo/dom-construct",
+        "esri/map",
+        "esri/layers/FeatureLayer",
+        "esri/geometry/Extent",
+        "esri/InfoTemplate",
+        "dojo/on",
+        "dojo/domReady!"
+      ], function(
+          domConstruct,
+          Map,
+          FeatureLayer,
+          Extent,
+          InfoTemplate,
+          on
+        ) {
+          var bounds = new Extent({
+            "xmin":-16045622,
+            "ymin":-811556,
+            "xmax":7297718,
+            "ymax":11142818,
+            "spatialReference":{"wkid":102100}
+          });
+
+          var map = new Map("map", {
+            extent: bounds
+          });
+          on(dom.byId("export"), "click", exportToShapefile);
+          var url = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/WorldTimeZones/MapServer/2";
+
+          var template = new InfoTemplate("World Regions", "Region: ${REGION}");
+
+          var fl = new FeatureLayer(url, {
+            id: "world-regions",
+            infoTemplate: template
+          });
+
+          map.addLayer(fl);
+           function exportToShapefile() {
+            //for Esri
+            var coordSystem = 'PROJCS["WGS_1984_Web_Mercator_Auxiliary_Sphere", GEOGCS["GCS_WGS_1984", DATUM["D_WGS_1984", SPHEROID["WGS_1984", 6378137.0, 298.257223563]], PRIMEM["Greenwich", 0.0], UNIT["Degree", 0.0174532925199433]], PROJECTION["Mercator_Auxiliary_Sphere"], PARAMETER["False_Easting", 0.0], PARAMETER["False_Northing", 0.0], PARAMETER["Central_Meridian", 0.0], PARAMETER["Standard_Parallel_1", 0.0], PARAMETER["Auxiliary_Sphere_Type", 0.0], UNIT["Meter", 1.0]]';
+            window.JS2Shapefile.createShapeFiles(map.graphics.graphics, 'UTF8', coordSystem);
+        }
+        }
+      );
+    </script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <button id="export" style="background-color: #4CAF50;" >Export to shapefile</button>
+  </body>
+</html>
